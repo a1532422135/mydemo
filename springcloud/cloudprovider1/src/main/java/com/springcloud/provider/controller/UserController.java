@@ -15,7 +15,7 @@ public class UserController {
         User user = new User();
         user.setAge(18);
         user.setId(id);
-        user.setName("张三");
+        user.setName("张三1");
         return user;
     }
 
