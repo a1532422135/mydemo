@@ -6,7 +6,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>cloudprovider</module>
-        <module>cloudconsumer</module>
+        <module>cloudcenter</module>
     </modules>
     <parent>
         <groupId>com.shinan</groupId>
