@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.example.springboot.dao.UserMapper">
+    <resultMap type="com.example.springboot.bean.User" id="userResultMap">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="queryUserByName" parameterType="String" resultMap="userResultMap">
+        <bind name="pattern" value="'%'+name+'%'"/>
+        SELECT * FROM user WHERE name LIKE #{pattern}
+    </select>
+
+    <insert id="insertUser" parameterType="com.example.springboot.bean.User">
+        insert into user(user_name,password,name) VALUES (#{user.userName},#{user.password},#{user.name});
+    </insert>
+
+    <delete id="deleteUserByName" parameterType="String">
+        <bind name="pattern" value="'%'+name+'%'"/>
+        delete from user WHERE name LIKE #{pattern};
+    </delete>
+
+    <update id="updateUser">
+        UPDATE user set name=#{name} WHERE id=#{id};
+    </update>
+
+</mapper>
