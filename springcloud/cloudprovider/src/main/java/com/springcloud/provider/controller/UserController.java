@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UserController {
 
-    @RequestMapping("getUser")
+    @RequestMapping(value = "getUser", produces = {"application/json;charset=UTF-8"})
     public User getUser(long id) {
         User user = new User();
         user.setAge(18);
