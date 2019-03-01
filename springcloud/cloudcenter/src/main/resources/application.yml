@@ -14,3 +14,5 @@ eureka:
     #此项目不作为客户端注册
     register-with-eureka: false
     fetch-registry: false
+  server:
+    enable-self-preservation: false
