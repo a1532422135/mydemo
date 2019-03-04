@@ -9,7 +9,7 @@
         <module>cloudprovider1</module>
         <module>cloudcenter</module>
         <module>cloudconsumer</module>
-        <module>cloudconsumer1</module>
+        <module>cloudconsumerfeign</module>
     </modules>
     <parent>
         <groupId>com.shinan</groupId>
