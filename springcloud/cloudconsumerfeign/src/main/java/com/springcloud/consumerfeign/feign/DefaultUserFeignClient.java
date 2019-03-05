@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(value = "cloud-provider")
-public interface UserFeignClient {
+public interface DefaultUserFeignClient {
 
     @GetMapping(value = "/user/getUser")
     public User getUser(@RequestParam("id") long id);

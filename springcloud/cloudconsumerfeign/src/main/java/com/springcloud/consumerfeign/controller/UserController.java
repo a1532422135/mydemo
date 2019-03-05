@@ -1,7 +1,7 @@
 package com.springcloud.consumerfeign.controller;
 
 import com.springcloud.consumerfeign.bean.User;
-import com.springcloud.consumerfeign.feign.UserFeignClient;
+import com.springcloud.consumerfeign.feign.DefaultUserFeignClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Autowired
-    private UserFeignClient userFeignClient;
+    private DefaultUserFeignClient userFeignClient;
 
     @RequestMapping(value = "getUser", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.GET)
     @ApiOperation(value = "根据id查找用户", notes = "根据id查找用户")

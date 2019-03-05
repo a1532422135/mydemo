@@ -12,9 +12,9 @@ public class LoadBalanced {
     @Bean
     public IRule ribbonRule() {
 //        return new RoundRobinRule(); //轮训
-        return new WeightedResponseTimeRule(); //加权权重
+//        return new WeightedResponseTimeRule(); //加权权重
 //        return new RetryRule(); //带有重试机制的轮训
 //        return new RandomRule(); //随机
-//        return new TestRule(); //自定义规则
+        return new TestRule(); //自定义规则
     }
 }
