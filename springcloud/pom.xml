@@ -10,6 +10,7 @@
         <module>cloudcenter</module>
         <module>cloudconsumer</module>
         <module>cloudconsumerfeign</module>
+        <module>cloudconsumerhystrix</module>
     </modules>
     <parent>
         <groupId>com.shinan</groupId>
