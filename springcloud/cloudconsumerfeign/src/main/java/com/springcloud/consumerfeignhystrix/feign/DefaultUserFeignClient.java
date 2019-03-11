@@ -1,6 +1,6 @@
-package com.springcloud.consumerfeign.feign;
+package com.springcloud.consumerfeignhystrix.feign;
 
-import com.springcloud.consumerfeign.bean.User;
+import com.springcloud.consumerfeignhystrix.bean.User;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

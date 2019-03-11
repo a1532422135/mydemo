@@ -1,4 +1,4 @@
-package com.springcloud.consumerfeign.swagger;
+package com.springcloud.consumerfeignhystrix.swagger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

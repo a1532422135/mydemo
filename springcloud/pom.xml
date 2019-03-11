@@ -11,6 +11,7 @@
         <module>cloudconsumer</module>
         <module>cloudconsumerfeign</module>
         <module>cloudconsumerhystrix</module>
+        <module>cloudconsumerfeignhystrix</module>
     </modules>
     <parent>
         <groupId>com.shinan</groupId>

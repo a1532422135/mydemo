@@ -1,4 +1,4 @@
-package com.springcloud.consumerfeign.bean;
+package com.springcloud.consumerfeignhystrix.bean;
 
 import lombok.Data;
 

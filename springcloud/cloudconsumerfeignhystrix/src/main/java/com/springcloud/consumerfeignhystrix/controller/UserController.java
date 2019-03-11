@@ -1,11 +1,13 @@
-package com.springcloud.consumerfeign.controller;
+package com.springcloud.consumerfeignhystrix.controller;
 
-import com.springcloud.consumerfeign.bean.User;
-import com.springcloud.consumerfeign.feign.DefaultUserFeignClient;
+import com.springcloud.consumerfeignhystrix.bean.User;
+import com.springcloud.consumerfeignhystrix.feign.DefaultUserFeignClient;
+import com.springcloud.consumerfeignhystrix.feign.HystrixClientFallback;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
