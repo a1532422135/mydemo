@@ -1,4 +1,4 @@
-package com.example.test.netty.server;
+package com.example.test.common.netty.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,4 +1,4 @@
-package com.example.test.directMemory;
+package com.example.test.common.directMemory;
 
 import java.nio.ByteBuffer;
 

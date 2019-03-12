@@ -1,7 +1,7 @@
-package com.example.test.netty;
+package com.example.test.common.netty;
 
-import com.example.test.netty.client.NettyClient;
-import com.example.test.netty.server.NettyServer;
+import com.example.test.common.netty.client.NettyClient;
+import com.example.test.common.netty.server.NettyServer;
 
 public class Netty {
     public static void main(String[] args) {

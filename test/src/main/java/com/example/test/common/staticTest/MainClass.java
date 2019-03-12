@@ -1,4 +1,4 @@
-package com.example.test.staticTest;
+package com.example.test.common.staticTest;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

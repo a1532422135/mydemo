@@ -1,4 +1,4 @@
-package com.example.test.hashcode;
+package com.example.test.common.hashcode;
 
 import lombok.extern.slf4j.Slf4j;
 

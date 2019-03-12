@@ -1,4 +1,4 @@
-package com.example.test.staticTest;
+package com.example.test.common.staticTest;
 
 public class ThreadTestB implements Runnable {
     private  int a = 1;
