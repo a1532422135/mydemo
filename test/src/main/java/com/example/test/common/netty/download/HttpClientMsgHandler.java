@@ -3,11 +3,16 @@ package com.example.test.common.netty.download;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+@Slf4j
 public class HttpClientMsgHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
@@ -20,7 +25,7 @@ public class HttpClientMsgHandler extends SimpleChannelInboundHandler<FullHttpRe
         if (!response.headers().isEmpty()) {
             for (CharSequence name : response.headers().names()) {
                 for (CharSequence value : response.headers().getAll(name)) {
-                    System.err.println("HEADER: " + name + " = " + value);
+                    log.info("HEADER: " + name + " = " + value);
                 }
             }
             System.err.println();
@@ -31,14 +36,18 @@ public class HttpClientMsgHandler extends SimpleChannelInboundHandler<FullHttpRe
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         fc.write(bb);
         fc.close();
-        FileOutputStream fileOutputStream = new FileOutputStream("bbbb.jpg");
-        fileOutputStream.write(bytes);
-        fileOutputStream.close();
+        log.info("文件长度为:{}",bytes.length);
+        FileInputStream fileInputStream = new FileInputStream("aaaa.jpg");
+        FileChannel channel = fileInputStream.getChannel();
+        ByteBuffer byteBuffer = ByteBuffer.allocate((int) channel.size());
+        log.info("文件长度为:{}", byteBuffer.array().length);
+        fileInputStream.close();
+        channel.close();
         HttpClient.map.put("1", response.content());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.err.println("连接被关闭了");
+        log.info("连接{}被关闭了", ctx.channel());
     }
 }

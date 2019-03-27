@@ -7,6 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class HttpClient {
     public final static Logger logger = LoggerFactory.getLogger(HttpClient.class);
     public static final Map<String, ByteBuf> map = new ConcurrentHashMap<String, ByteBuf>();
@@ -46,9 +48,9 @@ public class HttpClient {
                 break;
             }
         }
-        System.out.println("用netty下载耗时:" + (System.currentTimeMillis() - time));
+        log.info("用netty下载耗时: {}",(System.currentTimeMillis() - time));
 //        ch.closeFuture();
 //        group.shutdownGracefully();
-        System.err.println(ch.isActive() + "" + ch.isOpen());
+        log.info(ch.isActive() + "" + ch.isOpen());
     }
 }
