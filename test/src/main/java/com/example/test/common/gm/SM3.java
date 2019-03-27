@@ -1,4 +1,4 @@
-package com.example.test.common.sm3;
+package com.example.test.common.gm;
 
 import java.io.*;
 import java.math.BigInteger;
