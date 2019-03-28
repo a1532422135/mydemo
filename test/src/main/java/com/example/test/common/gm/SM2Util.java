@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.gm.GMObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SM3Digest;
 import org.bouncycastle.crypto.engines.SM2Engine;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
@@ -18,15 +17,10 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,7 +47,7 @@ import java.util.Arrays;
  * 这个版本的BC对SM2的结果为C1||C2||C3，据说为旧标准，新标准为C1||C3||C2，用新标准的需要自己转换。下面changeC1C2C3ToC1C3C2、changeC1C3C2ToC1C2C3就在干这事。
  */
 @Slf4j
-public class GMUtil {
+public class SM2Util {
 
     private static X9ECParameters ecParameters = GMNamedCurves.getByName("sm2p256v1");
     private static ECDomainParameters ecDomainParameters = new ECDomainParameters(ecParameters.getCurve(), ecParameters.getG(), ecParameters.getN());
@@ -69,7 +63,7 @@ public class GMUtil {
 
     static {
         if (Security.getProvider("BC") == null) {
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Security.addProvider(new BouncyCastleProvider());
         }
     }
 
@@ -228,48 +222,6 @@ public class GMUtil {
         }
     }
 
-    public static byte[] sm4Encrypt(byte[] keyBytes, byte[] plain) {
-        if (keyBytes.length != 16) throw new RuntimeException("err key length");
-        if (plain.length % 16 != 0) throw new RuntimeException("err data length");
-
-        try {
-            Key key = new SecretKeySpec(keyBytes, "SM4");
-            Cipher out = Cipher.getInstance("SM4/ECB/NoPadding", "BC");
-            out.init(Cipher.ENCRYPT_MODE, key);
-            return out.doFinal(plain);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static byte[] sm4Decrypt(byte[] keyBytes, byte[] cipher) {
-        if (keyBytes.length != 16) throw new RuntimeException("err key length");
-        if (cipher.length % 16 != 0) throw new RuntimeException("err data length");
-
-        try {
-            Key key = new SecretKeySpec(keyBytes, "SM4");
-            Cipher in = Cipher.getInstance("SM4/ECB/NoPadding", "BC");
-            in.init(Cipher.DECRYPT_MODE, key);
-            return in.doFinal(cipher);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    /**
-     * @param bytes
-     * @return
-     */
-    public static byte[] sm3(byte[] bytes) {
-        SM3Digest sm3 = new SM3Digest();
-        sm3.update(bytes, 0, bytes.length);
-        byte[] result = new byte[sm3.getDigestSize()];
-        sm3.doFinal(result, 0);
-        return result;
-    }
-
     private final static int RS_LEN = 32;
 
     private static byte[] bigIntToFixexLengthBytes(BigInteger rOrS) {
@@ -326,7 +278,7 @@ public class GMUtil {
 
     public static KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator kpGen = KeyPairGenerator.getInstance("EC", new BouncyCastleProvider());
+            KeyPairGenerator kpGen = KeyPairGenerator.getInstance("EC", "BC");
             kpGen.initialize(sm2Spec, new SecureRandom());
             KeyPair kp = kpGen.generateKeyPair();
             return kp;
@@ -335,22 +287,11 @@ public class GMUtil {
         }
     }
 
-    public static BCECPrivateKey getPrivatekeyFromD(BigInteger d) {
-        ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(d, sm2Spec);
-        return new BCECPrivateKey("EC", ecPrivateKeySpec, BouncyCastleProvider.CONFIGURATION);
-    }
-
-    public static BCECPublicKey getPublickeyFromXY(BigInteger x, BigInteger y) {
-        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(ecParameters.getCurve().createPoint(x, y), sm2Spec);
-        return new BCECPublicKey("EC", ecPublicKeySpec, BouncyCastleProvider.CONFIGURATION);
-    }
-
     public static PublicKey getPublickeyFromX509File(File file) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
             FileInputStream in = new FileInputStream(file);
             X509Certificate x509 = (X509Certificate) cf.generateCertificate(in);
-//            log.info(x509.getSerialNumber());
             return x509.getPublicKey();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -360,68 +301,39 @@ public class GMUtil {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException, InvalidKeyException, SignatureException, CertificateException {
 
         //生成公私钥对 ---------------------
-        KeyPair kp = generateKeyPair();
+//        KeyPair kp = generateKeyPair();
+//
+//        log.info(Hex.toHexString(kp.getPrivate().getEncoded()));
+//        log.info(Hex.toHexString(kp.getPublic().getEncoded()));
+//
+//        log.info(kp.getPrivate().getAlgorithm());
+//        log.info(kp.getPublic().getAlgorithm());
+//
+//        log.info(kp.getPrivate().getFormat());
+//        log.info(kp.getPublic().getFormat());
+//
+//        log.info("private key d: " + ((BCECPrivateKey) kp.getPrivate()).getD());
+//        log.info("public key q:" + ((BCECPublicKey) kp.getPublic()).getQ()); //{x, y, zs...}
+//        //签名和解签
+//        byte[] msg = "message digest".getBytes();
+//        byte[] userId = "userId".getBytes();
+//        byte[] sig = signSm3WithSm2(msg, userId, kp.getPrivate());
+//        log.info(Hex.toHexString(sig));
+//        log.info("verifySm3WithSm2:{}", verifySm3WithSm2(msg, userId, sig, kp.getPublic()));
 
-        log.info(Hex.toHexString(kp.getPrivate().getEncoded()));
-        log.info(Hex.toHexString(kp.getPublic().getEncoded()));
-
-        log.info(kp.getPrivate().getAlgorithm());
-        log.info(kp.getPublic().getAlgorithm());
-
-        log.info(kp.getPrivate().getFormat());
-        log.info(kp.getPublic().getFormat());
-
-        log.info("private key d: " + ((BCECPrivateKey) kp.getPrivate()).getD());
-        log.info("public key q:" + ((BCECPublicKey) kp.getPublic()).getQ()); //{x, y, zs...}
-        //签名和解签
-        byte[] msg = "message digest".getBytes();
-        byte[] userId = "userId".getBytes();
-        byte[] sig = signSm3WithSm2(msg, userId, kp.getPrivate());
-        log.info(Hex.toHexString(sig));
-        log.info("verifySm3WithSm2:{}", verifySm3WithSm2(msg, userId, sig, kp.getPublic()));
-
-
-        //由d生成私钥 ---------------------
-        BigInteger d = new BigInteger("097b5230ef27c7df0fa768289d13ad4e8a96266f0fcb8de40d5942af4293a54a", 16);
-        BCECPrivateKey bcecPrivateKey = getPrivatekeyFromD(d);
-        log.info("bcecPrivateKey.getParameters():{}", bcecPrivateKey.getParameters());
-        log.info(Hex.toHexString(bcecPrivateKey.getEncoded()));
-        log.info(bcecPrivateKey.getAlgorithm());
-        log.info(bcecPrivateKey.getFormat());
-        log.info("bcecPrivateKey.getD():{}", bcecPrivateKey.getD());
-        log.info("bcecPrivateKey instanceof ECPrivateKey:{}", bcecPrivateKey instanceof java.security.interfaces.ECPrivateKey);
-        log.info("bcecPrivateKey instanceof ECPrivateKey:{}", bcecPrivateKey instanceof ECPrivateKey);
-        log.info("bcecPrivateKey.getParameters():{}", bcecPrivateKey.getParameters());
-
-        //公钥X坐标PublicKeyXHex: 59cf9940ea0809a97b1cbffbb3e9d96d0fe842c1335418280bfc51dd4e08a5d4
-        //公钥Y坐标PublicKeyYHex: 9a7f77c578644050e09a9adc4245d1e6eba97554bc8ffd4fe15a78f37f891ff8
         //解析证书
-//        PublicKey publicKey = getPublickeyFromX509File(new File("/Users/xxx/Downloads/xxxxx.cer"));
-//        log.info(publicKey);
-//        PublicKey publicKey1 = getPublickeyFromXY(new BigInteger("59cf9940ea0809a97b1cbffbb3e9d96d0fe842c1335418280bfc51dd4e08a5d4", 16), new BigInteger("9a7f77c578644050e09a9adc4245d1e6eba97554bc8ffd4fe15a78f37f891ff8", 16));
-//        log.info(publicKey1);
-//        log.info(publicKey.equals(publicKey1));
-//        log.info(publicKey.getEncoded().equals(publicKey1.getEncoded()));
+        PublicKey publicKey = getPublickeyFromX509File(new File("E:\\demo\\mydemo\\test-cert.cer"));
+        log.info("publicKey:{}", Hex.toHexString(publicKey.getEncoded()));
 
 
         //sm2 encrypt and decrypt test ---------------------
-        KeyPair kp1 = generateKeyPair();
-        PublicKey publicKey2 = kp1.getPublic();
-        PrivateKey privateKey2 = kp1.getPrivate();
-        byte[] bs = sm2Encrypt("哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发".getBytes(), publicKey2);
-        log.info(Hex.toHexString(bs));
-        bs = sm2Decrypt(bs, privateKey2);
-        log.info(new String(bs));
-
-
-        // sm4 encrypt and decrypt test ---------------------
-        //0123456789abcdeffedcba9876543210 + 0123456789abcdeffedcba9876543210 -> 681edf34d206965e86b3e94f536e4246
-//        byte[] plain = Hex.decode("0123456789abcdeffedcba98765432100123456789abcdeffedcba98765432100123456789abcdeffedcba9876543210");
-//        byte[] key = Hex.decode("0123456789abcdeffedcba9876543210");
-//        byte[] cipher = Hex.decode("595298c7c6fd271f0402f804c33d3f66");
-//        byte[] bs = sm4Encrypt(key, plain);
-//        log.info(Hex.toHexString(bs));;
-//        bs = sm4Decrypt(key, bs);
+//        KeyPair kp1 = generateKeyPair();
+//        PublicKey publicKey2 = kp1.getPublic();
+//        PrivateKey privateKey2 = kp1.getPrivate();
+//        byte[] bs = sm2Encrypt("哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发".getBytes(), publicKey2);
 //        log.info(Hex.toHexString(bs));
+//        bs = sm2Decrypt(bs, privateKey2);
+//        log.info(new String(bs));
+
     }
 }
