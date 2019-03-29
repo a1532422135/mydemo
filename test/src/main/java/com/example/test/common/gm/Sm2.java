@@ -1,13 +1,15 @@
 package com.example.test.common.gm;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.gm.GMObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.SM2Engine;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -19,20 +21,25 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.security.*;
 import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Random;
 
 /**
+ * @author shinan
  * need jars:
  * bcpkix-jdk15on-160.jar
  * bcprov-jdk15on-160.jar
@@ -47,7 +54,7 @@ import java.util.Arrays;
  * 这个版本的BC对SM2的结果为C1||C2||C3，据说为旧标准，新标准为C1||C3||C2，用新标准的需要自己转换。下面changeC1C2C3ToC1C3C2、changeC1C3C2ToC1C2C3就在干这事。
  */
 @Slf4j
-public class SM2Util {
+public class Sm2 {
 
     private static X9ECParameters ecParameters = GMNamedCurves.getByName("sm2p256v1");
     private static ECDomainParameters ecDomainParameters = new ECDomainParameters(ecParameters.getCurve(), ecParameters.getG(), ecParameters.getN());
@@ -60,12 +67,7 @@ public class SM2Util {
             , ecParameters.getG()
             // 大整数N
             , ecParameters.getN());
-
-    static {
-        if (Security.getProvider("BC") == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
-    }
+    private static BouncyCastleProvider bc = new BouncyCastleProvider();
 
     /**
      * @param msg
@@ -86,7 +88,7 @@ public class SM2Util {
     public static byte[] signSm3WithSm2Asn1Rs(byte[] msg, byte[] userId, PrivateKey privateKey) {
         try {
             SM2ParameterSpec parameterSpec = new SM2ParameterSpec(userId);
-            Signature signer = Signature.getInstance("SM3withSM2", "BC");
+            Signature signer = Signature.getInstance("SM3withSM2", bc);
             signer.setParameter(parameterSpec);
             signer.initSign(privateKey, new SecureRandom());
             signer.update(msg, 0, msg.length);
@@ -118,7 +120,7 @@ public class SM2Util {
     public static boolean verifySm3WithSm2Asn1Rs(byte[] msg, byte[] userId, byte[] rs, PublicKey publicKey) {
         try {
             SM2ParameterSpec parameterSpec = new SM2ParameterSpec(userId);
-            Signature verifier = Signature.getInstance("SM3withSM2", "BC");
+            Signature verifier = Signature.getInstance("SM3withSM2", bc);
             verifier.setParameter(parameterSpec);
             verifier.initVerify(publicKey);
             verifier.update(msg, 0, msg.length);
@@ -135,12 +137,13 @@ public class SM2Util {
      * @return
      */
     private static byte[] changeC1C2C3ToC1C3C2(byte[] c1c2c3) {
-        final int c1Len = (ecParameters.getCurve().getFieldSize() + 7) / 8 * 2 + 1; //sm2p256v1的这个固定65。可看GMNamedCurves、ECCurve代码。
-        final int c3Len = 32; //new SM3Digest().getDigestSize();
+        //sm2p256v1的这个固定65。可看GMNamedCurves、ECCurve代码。
+        final int c1Len = (ecParameters.getCurve().getFieldSize() + 7) / 8 * 2 + 1;
+        final int c3Len = 32;
         byte[] result = new byte[c1c2c3.length];
-        System.arraycopy(c1c2c3, 0, result, 0, c1Len); //c1
-        System.arraycopy(c1c2c3, c1c2c3.length - c3Len, result, c1Len, c3Len); //c3
-        System.arraycopy(c1c2c3, c1Len, result, c1Len + c3Len, c1c2c3.length - c1Len - c3Len); //c2
+        System.arraycopy(c1c2c3, 0, result, 0, c1Len);
+        System.arraycopy(c1c2c3, c1c2c3.length - c3Len, result, c1Len, c3Len);
+        System.arraycopy(c1c2c3, c1Len, result, c1Len + c3Len, c1c2c3.length - c1Len - c3Len);
         return result;
     }
 
@@ -152,12 +155,13 @@ public class SM2Util {
      * @return
      */
     private static byte[] changeC1C3C2ToC1C2C3(byte[] c1c3c2) {
-        final int c1Len = (ecParameters.getCurve().getFieldSize() + 7) / 8 * 2 + 1; //sm2p256v1的这个固定65。可看GMNamedCurves、ECCurve代码。
-        final int c3Len = 32; //new SM3Digest().getDigestSize();
+        //sm2p256v1的这个固定65。可看GMNamedCurves、ECCurve代码。
+        final int c1Len = (ecParameters.getCurve().getFieldSize() + 7) / 8 * 2 + 1;
+        final int c3Len = 32;
         byte[] result = new byte[c1c3c2.length];
-        System.arraycopy(c1c3c2, 0, result, 0, c1Len); //c1: 0->65
-        System.arraycopy(c1c3c2, c1Len + c3Len, result, c1Len, c1c3c2.length - c1Len - c3Len); //c2
-        System.arraycopy(c1c3c2, c1Len, result, c1c3c2.length - c3Len, c3Len); //c3
+        System.arraycopy(c1c3c2, 0, result, 0, c1Len);
+        System.arraycopy(c1c3c2, c1Len + c3Len, result, c1Len, c1c3c2.length - c1Len - c3Len);
+        System.arraycopy(c1c3c2, c1Len, result, c1c3c2.length - c3Len, c3Len);
         return result;
     }
 
@@ -228,9 +232,11 @@ public class SM2Util {
         // for sm2p256v1, n is 00fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123,
         // r and s are the result of mod n, so they should be less than n and have length<=32
         byte[] rs = rOrS.toByteArray();
-        if (rs.length == RS_LEN) return rs;
-        else if (rs.length == RS_LEN + 1 && rs[0] == 0) return Arrays.copyOfRange(rs, 1, RS_LEN + 1);
-        else if (rs.length < RS_LEN) {
+        if (rs.length == RS_LEN) {
+            return rs;
+        } else if (rs.length == RS_LEN + 1 && rs[0] == 0) {
+            return Arrays.copyOfRange(rs, 1, RS_LEN + 1);
+        } else if (rs.length < RS_LEN) {
             byte[] result = new byte[RS_LEN];
             Arrays.fill(result, (byte) 0);
             System.arraycopy(rs, 0, result, RS_LEN - rs.length, rs.length);
@@ -263,7 +269,9 @@ public class SM2Util {
      * @return rs result in asn1 format
      */
     private static byte[] rsPlainByteArrayToAsn1(byte[] sign) {
-        if (sign.length != RS_LEN * 2) throw new RuntimeException("err rs. ");
+        if (sign.length != RS_LEN * 2) {
+            throw new RuntimeException("err rs. ");
+        }
         BigInteger r = new BigInteger(1, Arrays.copyOfRange(sign, 0, RS_LEN));
         BigInteger s = new BigInteger(1, Arrays.copyOfRange(sign, RS_LEN, RS_LEN * 2));
         ASN1EncodableVector v = new ASN1EncodableVector();
@@ -278,7 +286,7 @@ public class SM2Util {
 
     public static KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator kpGen = KeyPairGenerator.getInstance("EC", "BC");
+            KeyPairGenerator kpGen = KeyPairGenerator.getInstance("EC", bc);
             kpGen.initialize(sm2Spec, new SecureRandom());
             KeyPair kp = kpGen.generateKeyPair();
             return kp;
@@ -289,7 +297,7 @@ public class SM2Util {
 
     public static PublicKey getPublickeyFromX509File(File file) {
         try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", bc);
             FileInputStream in = new FileInputStream(file);
             X509Certificate x509 = (X509Certificate) cf.generateCertificate(in);
             return x509.getPublicKey();
@@ -298,42 +306,110 @@ public class SM2Util {
         }
     }
 
+    public static void genCert(KeyPair keyPair) {
+        // 设置开始日期和结束日期
+        long year = 360 * 24 * 60 * 60 * 1000;
+        Date notBefore = new Date();
+        Date notAfter = new Date(notBefore.getTime() + year);
+
+        // 设置颁发者和主题
+        String issuerString = "CN=root,OU=单位,O=组织";
+        X500Name issueDn = new X500Name(issuerString);
+        X500Name subjectDn = new X500Name(issuerString);
+
+        // 证书序列号
+        BigInteger serail = BigInteger.probablePrime(32, new Random());
+        PublicKey publicKey = keyPair.getPublic();
+        PrivateKey privateKey = keyPair.getPrivate();
+        log.info("publicKey:{}", Hex.toHexString(publicKey.getEncoded()));
+        //组装公钥信息
+        SubjectPublicKeyInfo subjectPublicKeyInfo = null;
+        try {
+            subjectPublicKeyInfo = SubjectPublicKeyInfo
+                    .getInstance(new ASN1InputStream(publicKey.getEncoded())
+                            .readObject());
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+
+        //证书的签名数据
+        final byte[] signatureData;
+        try {
+            Signature signature = Signature.getInstance("SM3withSM2", bc);
+            signature.initSign(privateKey);
+            signature.update(publicKey.getEncoded());
+            signatureData = signature.sign();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+        //组装证书
+        X509v3CertificateBuilder builder = new X509v3CertificateBuilder(
+                issueDn, serail, notBefore, notAfter, subjectDn,
+                subjectPublicKeyInfo);
+
+        //给证书签名
+        X509CertificateHolder holder = builder.build(new ContentSigner() {
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+
+            @Override
+            public byte[] getSignature() {
+                try {
+                    buf.write(signatureData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return signatureData;
+            }
+
+            @Override
+            public OutputStream getOutputStream() {
+                return buf;
+            }
+
+            @Override
+            public AlgorithmIdentifier getAlgorithmIdentifier() {
+                return AlgorithmIdentifier.getInstance(new DefaultSignatureAlgorithmIdentifierFinder().find("SM3WITHSM2"));
+            }
+        });
+        try {
+            byte[] certBuf = holder.getEncoded();
+            X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(certBuf));
+            byte[] encode = certificate.getEncoded();
+            FileOutputStream fileOutputStream = new FileOutputStream("aaa.cer");
+            FileChannel fileChannel = fileOutputStream.getChannel();
+            fileChannel.write(ByteBuffer.wrap(encode));
+            fileChannel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException, InvalidKeyException, SignatureException, CertificateException {
 
         //生成公私钥对 ---------------------
-//        KeyPair kp = generateKeyPair();
-//
-//        log.info(Hex.toHexString(kp.getPrivate().getEncoded()));
-//        log.info(Hex.toHexString(kp.getPublic().getEncoded()));
-//
-//        log.info(kp.getPrivate().getAlgorithm());
-//        log.info(kp.getPublic().getAlgorithm());
-//
-//        log.info(kp.getPrivate().getFormat());
-//        log.info(kp.getPublic().getFormat());
-//
-//        log.info("private key d: " + ((BCECPrivateKey) kp.getPrivate()).getD());
-//        log.info("public key q:" + ((BCECPublicKey) kp.getPublic()).getQ()); //{x, y, zs...}
-//        //签名和解签
-//        byte[] msg = "message digest".getBytes();
-//        byte[] userId = "userId".getBytes();
-//        byte[] sig = signSm3WithSm2(msg, userId, kp.getPrivate());
-//        log.info(Hex.toHexString(sig));
-//        log.info("verifySm3WithSm2:{}", verifySm3WithSm2(msg, userId, sig, kp.getPublic()));
-
+        KeyPair kp = generateKeyPair();
+        genCert(kp);
+        //签名和解签
+        byte[] msg = "message digest".getBytes();
+        byte[] userId = "userId".getBytes();
+        byte[] sig = signSm3WithSm2(msg, userId, kp.getPrivate());
+        log.info(Hex.toHexString(sig));
         //解析证书
-        PublicKey publicKey = getPublickeyFromX509File(new File("E:\\demo\\mydemo\\test-cert.cer"));
+        PublicKey publicKey = getPublickeyFromX509File(new File("aaa.cer"));
         log.info("publicKey:{}", Hex.toHexString(publicKey.getEncoded()));
+        log.info("verifySm3WithSm2:{}", verifySm3WithSm2(msg, userId, sig, publicKey));
 
-
-        //sm2 encrypt and decrypt test ---------------------
-//        KeyPair kp1 = generateKeyPair();
-//        PublicKey publicKey2 = kp1.getPublic();
-//        PrivateKey privateKey2 = kp1.getPrivate();
-//        byte[] bs = sm2Encrypt("哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发".getBytes(), publicKey2);
-//        log.info(Hex.toHexString(bs));
-//        bs = sm2Decrypt(bs, privateKey2);
-//        log.info(new String(bs));
+        //sm2加解密
+        PublicKey publicKey2 = kp.getPublic();
+        PrivateKey privateKey2 = kp.getPrivate();
+        byte[] bs = sm2Encrypt("哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发哈哈哈打发打发".getBytes(), publicKey2);
+        log.info(Hex.toHexString(bs));
+        bs = sm2Decrypt(bs, privateKey2);
+        log.info(new String(bs));
 
     }
 }

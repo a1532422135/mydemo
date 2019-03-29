@@ -1,6 +1,7 @@
 package com.example.test.common.gm;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -58,7 +59,7 @@ public class SM3 {
     }
 
     private static Integer P1(Integer x) {
-        return Integer .valueOf(x.intValue() ^ Integer.rotateLeft(x.intValue(), 15) ^ Integer.rotateLeft(x.intValue(), 23));
+        return Integer.valueOf(x.intValue() ^ Integer.rotateLeft(x.intValue(), 15) ^ Integer.rotateLeft(x.intValue(), 23));
     }
 
     private static byte[] padding(byte[] source) throws IOException {
