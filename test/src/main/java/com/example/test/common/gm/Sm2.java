@@ -321,7 +321,6 @@ public class Sm2 {
         BigInteger serail = BigInteger.probablePrime(32, new Random());
         PublicKey publicKey = keyPair.getPublic();
         PrivateKey privateKey = keyPair.getPrivate();
-        log.info("publicKey:{}", Hex.toHexString(publicKey.getEncoded()));
         //组装公钥信息
         SubjectPublicKeyInfo subjectPublicKeyInfo = null;
         try {
@@ -375,7 +374,7 @@ public class Sm2 {
         });
         try {
             byte[] certBuf = holder.getEncoded();
-            X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(certBuf));
+            X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509",bc).generateCertificate(new ByteArrayInputStream(certBuf));
             byte[] encode = certificate.getEncoded();
             FileOutputStream fileOutputStream = new FileOutputStream("aaa.cer");
             FileChannel fileChannel = fileOutputStream.getChannel();
@@ -388,8 +387,7 @@ public class Sm2 {
         }
     }
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException, InvalidKeyException, SignatureException, CertificateException {
-
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException, InvalidKeyException, SignatureException, CertificateException, InterruptedException {
         //生成公私钥对 ---------------------
         KeyPair kp = generateKeyPair();
         genCert(kp);
@@ -397,10 +395,11 @@ public class Sm2 {
         byte[] msg = "message digest".getBytes();
         byte[] userId = "userId".getBytes();
         byte[] sig = signSm3WithSm2(msg, userId, kp.getPrivate());
-        log.info(Hex.toHexString(sig));
+        log.info("签名为:{}", Hex.toHexString(sig));
         //解析证书
         PublicKey publicKey = getPublickeyFromX509File(new File("aaa.cer"));
-        log.info("publicKey:{}", Hex.toHexString(publicKey.getEncoded()));
+        log.info("解析证书得到公钥:{}", Hex.toHexString(publicKey.getEncoded()));
+        log.info("通过生成得到公钥:{}", Hex.toHexString(kp.getPublic().getEncoded()));
         log.info("verifySm3WithSm2:{}", verifySm3WithSm2(msg, userId, sig, publicKey));
 
         //sm2加解密
