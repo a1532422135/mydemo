@@ -3,11 +3,11 @@ spring:
     name: eureka-server
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.1.191:3306/shinan
+    url: jdbc:mysql://192.168.50.106:3306/shinan
     username: root
     password: root
   profiles:
-    active: dev3
+    active: dev1
 dev:
   host: localhost
   dev1Port: 8761

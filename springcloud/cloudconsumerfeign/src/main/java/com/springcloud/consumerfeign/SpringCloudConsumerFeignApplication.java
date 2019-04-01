@@ -1,4 +1,4 @@
-package com.springcloud.consumerfeignhystrix;
+package com.springcloud.consumerfeign;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,7 +1,7 @@
-package com.springcloud.consumerfeignhystrix.controller;
+package com.springcloud.consumerfeign.controller;
 
-import com.springcloud.consumerfeignhystrix.bean.User;
-import com.springcloud.consumerfeignhystrix.feign.DefaultUserFeignClient;
+import com.springcloud.consumerfeign.bean.User;
+import com.springcloud.consumerfeign.feign.DefaultUserFeignClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,4 +25,13 @@ public class UserController {
         User user = userFeignClient.getUser(id);
         return user;
     }
+
+//    @RequestMapping(value = "getUser1", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.GET)
+//    @ApiOperation(value = "根据id查找用户", notes = "根据id查找用户")
+//    public User getUser1(long id) {
+//        User user = new User();
+//        user.setId(id);
+//        user = userFeignClient.getUser1(user);
+//        return user;
+//    }
 }
