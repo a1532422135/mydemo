@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients
-@EnableCircuitBreaker
+//@EnableCircuitBreaker
 public class SpringCloudConsumerFeignHystrixApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringCloudConsumerFeignHystrixApplication.class, args);

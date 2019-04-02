@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableCircuitBreaker
+@RibbonClient(name = "cloud-provider", configuration = com.springcloud.config.LoadBalanced.class)
 public class SpringCloudConsumerHystrixApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringCloudConsumerHystrixApplication.class, args);
