@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: cloud-zuul
+  datasource:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://192.168.50.106:3306/shinan
+      username: root
+      password: root
+server:
+  port: 8080
+zuul:
+  routes:
+    demo:
+      path: /user/**
+      serviceId: cloud-provider
+eureka:
+  instance:
+    hostname: shinan
