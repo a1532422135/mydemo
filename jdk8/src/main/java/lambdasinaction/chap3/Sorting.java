@@ -20,10 +20,7 @@ public class Sorting {
         
         // 2
         // [Apple{color='green', weight=30}, Apple{color='green', weight=80}, Apple{color='green', weight=155}]
-        inventory.sort(new Comparator<Apple>() {
-            public int compare(Apple a1, Apple a2){
-                return a1.getWeight().compareTo(a2.getWeight()); 
-        }});
+        inventory.sort((a1, a2) -> a1.getWeight().compareTo(a2.getWeight()));
         System.out.println(inventory);
 
         // reshuffling things a little

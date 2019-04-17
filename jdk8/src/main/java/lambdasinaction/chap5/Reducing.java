@@ -1,6 +1,7 @@
 package lambdasinaction.chap5;
 import lambdasinaction.chap4.*;
 
+import java.util.function.BinaryOperator;
 import java.util.stream.*;
 import java.util.*;
 
@@ -14,7 +15,7 @@ public class Reducing{
         int sum = numbers.stream().reduce(0, (a, b) -> a + b);
         System.out.println(sum);
 
-        int sum2 = numbers.stream().reduce(0, Integer::sum);
+        int sum2 = numbers.stream().reduce(0, (a, b) -> Integer.sum(a, b));
         System.out.println(sum2);
 
         int max = numbers.stream().reduce(0, (a, b) -> Integer.max(a, b));

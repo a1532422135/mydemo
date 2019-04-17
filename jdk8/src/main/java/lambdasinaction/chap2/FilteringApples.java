@@ -25,7 +25,12 @@ public class FilteringApples{
 		System.out.println(heavyApples);
 
 		// []
-		List<Apple> redAndHeavyApples = filter(inventory, new AppleRedAndHeavyPredicate());
+		List<Apple> redAndHeavyApples = filter(inventory, new ApplePredicate() {
+            @Override
+            public boolean test(Apple a) {
+                return ("red".equals(a.color) && a.weight > 150);
+            }
+        });
 		System.out.println(redAndHeavyApples);
 
 		// [Apple{color='red', weight=120}]
@@ -77,7 +82,7 @@ public class FilteringApples{
 			}
 		}
 		return result;
-	}       
+	}
 
 	public static class Apple {
 		private int weight = 0;

@@ -2,6 +2,7 @@ package lambdasinaction.chap5;
 
 import java.util.*;
 import java.util.function.IntSupplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
@@ -22,7 +23,12 @@ public class BuildingStreams {
         System.out.println(Arrays.stream(numbers).sum());
 
         // Stream.iterate
-        Stream.iterate(0, n -> n + 2)
+        Stream.iterate(0, new UnaryOperator<Integer>() {
+            @Override
+            public Integer apply(Integer n) {
+                return n + 2;
+            }
+        })
               .limit(10)
               .forEach(System.out::println);
 

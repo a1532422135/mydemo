@@ -8,13 +8,13 @@ import static lambdasinaction.chap6.Dish.menu;
 
 public class Grouping {
 
-    enum CaloricLevel { DIET, NORMAL, FAT };
+    enum CaloricLevel {DIET, NORMAL, FAT}
 
-    public static void main(String ... args) {
+    ;
+
+    public static void main(String... args) {
         System.out.println("Dishes grouped by type: " + groupDishesByType());
         System.out.println("Dish names grouped by type: " + groupDishNamesByType());
-        System.out.println("Dish tags grouped by type: " + groupDishTagsByType());
-        System.out.println("Caloric dishes grouped by type: " + groupCaloricDishesByType());
         System.out.println("Dishes grouped by caloric level: " + groupDishesByCaloricLevel());
         System.out.println("Dishes grouped by type and caloric level: " + groupDishedByTypeAndCaloricLevel());
         System.out.println("Count dishes in groups: " + countDishesInGroups());
@@ -32,22 +32,13 @@ public class Grouping {
         return menu.stream().collect(groupingBy(Dish::getType, mapping(Dish::getName, toList())));
     }
 
-    private static Map<Dish.Type, Set<String>> groupDishTagsByType() {
-        return menu.stream().collect(groupingBy(Dish::getType, flatMapping(dish -> dishTags.get( dish.getName() ).stream(), toSet())));
-    }
-
-    private static Map<Dish.Type, List<Dish>> groupCaloricDishesByType() {
-//        return menu.stream().filter(dish -> dish.getCalories() > 500).collect(groupingBy(Dish::getType));
-        return menu.stream().collect(groupingBy(Dish::getType, filtering(dish -> dish.getCalories() > 500, toList())));
-    }
-
     private static Map<CaloricLevel, List<Dish>> groupDishesByCaloricLevel() {
         return menu.stream().collect(
                 groupingBy(dish -> {
                     if (dish.getCalories() <= 400) return CaloricLevel.DIET;
                     else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
                     else return CaloricLevel.FAT;
-                } ));
+                }));
     }
 
     private static Map<Dish.Type, Map<CaloricLevel, List<Dish>>> groupDishedByTypeAndCaloricLevel() {
@@ -57,7 +48,7 @@ public class Grouping {
                             if (dish.getCalories() <= 400) return CaloricLevel.DIET;
                             else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
                             else return CaloricLevel.FAT;
-                        } )
+                        })
                 )
         );
     }
@@ -88,9 +79,11 @@ public class Grouping {
     private static Map<Dish.Type, Set<CaloricLevel>> caloricLevelsByType() {
         return menu.stream().collect(
                 groupingBy(Dish::getType, mapping(
-                        dish -> { if (dish.getCalories() <= 400) return CaloricLevel.DIET;
-                        else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
-                        else return CaloricLevel.FAT; },
-                        toSet() )));
+                        dish -> {
+                            if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                            else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                            else return CaloricLevel.FAT;
+                        },
+                        toSet())));
     }
 }

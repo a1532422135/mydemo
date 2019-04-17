@@ -1,9 +1,13 @@
 package lambdasinaction.chap3;
 
 import java.io.*;
+import java.util.function.Function;
+
 public class ExecuteAround {
 
 	public static void main(String ...args) throws IOException{
+
+        Function<String,Integer> stringIntegerFunction = Integer::parseInt;
 
         // method we want to refactor to make more flexible
         String result = processFileLimited();
@@ -14,7 +18,7 @@ public class ExecuteAround {
 		String oneLine = processFile((BufferedReader b) -> b.readLine());
 		System.out.println(oneLine);
 
-		String twoLines = processFile((BufferedReader b) -> b.readLine() + b.readLine());
+		String twoLines = processFile(b -> process(b));
 		System.out.println(twoLines);
 
 	}
@@ -34,8 +38,11 @@ public class ExecuteAround {
 
 	}
 
-	public interface BufferedReaderProcessor{
-		public String process(BufferedReader b) throws IOException;
+    private static String process(BufferedReader b) throws IOException {
+        return (b.readLine() + b.readLine());
+    }
 
+    public interface BufferedReaderProcessor{
+		public String process(BufferedReader b) throws IOException;
 	}
 }

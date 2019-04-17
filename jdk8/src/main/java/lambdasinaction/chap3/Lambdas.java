@@ -1,30 +1,32 @@
 package lambdasinaction.chap3;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class Lambdas {
-	public static void main(String ...args){
+	public static void main(String ...args){// Filtering with lambdas
+        List<Apple> inventory = Arrays.asList(new Apple(80,"green"), new Apple(155, "green"), new Apple(160, "red"));
 
 		// Simple example
 		Runnable r = () -> System.out.println("Hello!");
 		r.run();
 
-		// Filtering with lambdas
-		List<Apple> inventory = Arrays.asList(new Apple(80,"green"), new Apple(155, "green"), new Apple(120, "red"));
+		Comparator<Apple> c = Comparator.comparing(Apple::getWeight);
+        inventory.sort(c.reversed().thenComparing(Apple::getColor));
 
-		// [Apple{color='green', weight=80}, Apple{color='green', weight=155}]	
-		List<Apple> greenApples = filter(inventory, (Apple a) -> "green".equals(a.getColor()));
+        Predicate<Apple> redApple = Apple::isRed;
+
+        redApple = redApple.and(apple -> apple.getWeight() > 150).or(apple -> "green".equals(apple.getColor()));
+
+		// [Apple{color='green', weight=80}, Apple{color='green', weight=155}]
+		List<Apple> greenApples = filter(inventory,redApple);
 		System.out.println(greenApples);
 
-
-		Comparator<Apple> c = (Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight());
-
-		// [Apple{color='green', weight=80}, Apple{color='red', weight=120}, Apple{color='green', weight=155}]
 		inventory.sort(c);
 		System.out.println(inventory);
 	}
 
-	public static List<Apple> filter(List<Apple> inventory, ApplePredicate p){
+	public static List<Apple> filter(List<Apple> inventory, Predicate<Apple> p){
 		List<Apple> result = new ArrayList<>();
 		for(Apple apple : inventory){
 			if(p.test(apple)){
@@ -32,7 +34,7 @@ public class Lambdas {
 			}
 		}
 		return result;
-	}   
+	}
 
 	public static class Apple {
 		private int weight = 0;
@@ -58,6 +60,10 @@ public class Lambdas {
 		public void setColor(String color) {
 			this.color = color;
 		}
+
+		public boolean isRed(){
+		    return "red".equalsIgnoreCase(this.color);
+        }
 
 		public String toString() {
 			return "Apple{" +

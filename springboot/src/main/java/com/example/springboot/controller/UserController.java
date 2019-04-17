@@ -4,13 +4,14 @@ import com.example.springboot.Exception.MyException;
 import com.example.springboot.bean.User;
 import com.example.springboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("user")
 public class UserController {
 
@@ -49,5 +50,9 @@ public class UserController {
     public List<User> updateUser(String name, Long id) {
         int a = userService.updateUser(name, id);
         return userService.findAll();
+    }
+    @RequestMapping("/demo3")
+    public String demo3(){
+        return "demo3";//地址指向demo3.html
     }
 }
