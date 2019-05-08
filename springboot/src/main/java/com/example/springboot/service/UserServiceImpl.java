@@ -1,18 +1,24 @@
 package com.example.springboot.service;
 
 import com.example.springboot.bean.User;
+import com.example.springboot.dao.MyDao;
 import com.example.springboot.dao.UserDao;
 import com.example.springboot.dao.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private MyDao myDao;
     @Autowired
     private UserMapper userMapper;
 
@@ -23,6 +29,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findUserByName(String name) {
+        Optional<User> optional = userDao.findById(1l);
+        optional.orElseGet(User::new);
         return userDao.findUsersByName(name);
     }
 

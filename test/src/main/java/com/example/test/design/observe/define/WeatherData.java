@@ -1,8 +1,11 @@
 package com.example.test.design.observe.define;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class WeatherData implements Subject {
     private List<Observer> observerList;
     private float temperature;
