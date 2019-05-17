@@ -1,10 +1,12 @@
 package com.example.test.effectivejava.singleton;
 
+import com.example.test.effectivejava.override.Test;
+
 /**
  * @author Administrator
  * 饿汉
  */
-public class Elvid {
+public class Elvid extends Test{
     private static Elvid instance;
 
     private Elvid() {
@@ -12,6 +14,7 @@ public class Elvid {
     }
 
     public static Elvid getInstance() {
+        Test.a();
         if (instance == null) {
             synchronized (Elvid.class) {
                 if (instance == null) {

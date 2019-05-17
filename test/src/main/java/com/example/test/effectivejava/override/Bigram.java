@@ -7,8 +7,17 @@ import java.util.Set;
  * @author Administrator
  */
 public class Bigram {
-    private final char first;
-    private final char second;
+    private char first = 'a';
+    private char second = 'b';
+
+    public void sout(String a) {
+        System.out.println(a);
+        System.out.println(a);
+    }
+
+    public Bigram() {
+        System.out.println("bigram");
+    }
 
     public Bigram(char first, char second) {
         this.first = first;
