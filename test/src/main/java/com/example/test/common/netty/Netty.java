@@ -5,7 +5,7 @@ import com.example.test.common.netty.server.NettyServer;
 
 public class Netty {
     public static void main(String[] args) {
-        NettyServer.start("192.168.70.248", 60000);
-        NettyClient.connect("192.168.70.248", 60000);
+        NettyServer.start("192.168.70.250", 60000);
+//        NettyClient.connect("192.168.70.248", 60000);
     }
 }
