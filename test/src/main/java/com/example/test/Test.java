@@ -4,8 +4,7 @@ import com.example.test.design.observe.define.WeatherData;
 import io.swagger.models.auth.In;
 
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,12 +16,13 @@ import static java.util.stream.Collectors.toSet;
 
 public class Test {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i <= 500000; i++) {
-            list.add("1");
-        }
-        list = main(list);
-        System.out.println(list);
+        ExecutorService executorService = new ThreadPoolExecutor(10, 20, 10L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(1), new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                return null;
+            }
+        });
     }
 
     public static List<String> main(List<String> list) {

@@ -11,11 +11,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("user")
 public class UserController{
 
@@ -35,6 +36,7 @@ public class UserController{
     }
 
     @RequestMapping("queryUserByName")
+    @ResponseBody
     public List<User> queryUserByName(String name) {
         List<User> list = userService.queryUserByName(name);
         return list;
