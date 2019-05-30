@@ -3,26 +3,19 @@ package com.example.test.effectivejava.override;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Test {
     public static void main(String[] args) {
-        a(1);
+        List<String> list = new ArrayList<String>();
+        list.add("ad");
+        list.add("adc");
+        list = list.stream().filter(a -> a.length() < 1).collect(Collectors.toList());
+        System.out.println(list);
     }
 
-    public enum Days {
-        MONDAY(1), TUESDAY(2), WEDNESDAY(3), THURSDAY(4), FRIDAY(5), SATURDAY(6), SUNDAY(7);
-        private int day;
-
-        Days(int day) {
-            this.day = day;
-        }
-    }
-
-    private static void a(int i) {
-        System.out.println(Days.FRIDAY.day);
-    }
-
-    protected static int a() {
+    public int a() {
         return 1;
     }
 }

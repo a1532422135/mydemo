@@ -14,7 +14,6 @@ public class Elvid extends Test{
     }
 
     public static Elvid getInstance() {
-        Test.a();
         if (instance == null) {
             synchronized (Elvid.class) {
                 if (instance == null) {

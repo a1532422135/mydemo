@@ -16,6 +16,8 @@ import static java.util.stream.Collectors.toSet;
 
 public class Test {
     public static void main(String[] args) {
+        TreeSet treeSet = new TreeSet();
+        treeSet.add(1);
         ExecutorService executorService = new ThreadPoolExecutor(10, 20, 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(1), new ThreadFactory() {
             @Override
@@ -25,7 +27,7 @@ public class Test {
         });
     }
 
-    public static List<String> main(List<String> list) {
+    List<String> main(List<String> list) {
 //        Stream.iterate(0,t->t+1).limit(list.size()).map(a->list.stream().collect(Collectors.joining("*"))).forEach(a -> System.out.println(a));
         Object object = list.parallelStream().skip(5000).limit(5000).collect(Collectors.joining(","));
 //        System.out.println(object);
@@ -33,7 +35,7 @@ public class Test {
         return null;
     }
 
-    private List<String> a(List<String> list) {
+    protected List<String> a(List<String> list) {
         List<String> list1 = Stream.iterate(0, t -> t + 1)
                 .limit(list.size())
                 .parallel()
