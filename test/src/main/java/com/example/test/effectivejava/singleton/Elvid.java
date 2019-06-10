@@ -15,12 +15,12 @@ public class Elvid extends Test{
 
     public static Elvid getInstance() {
         if (instance == null) {
-            synchronized (Elvid.class) {
-                if (instance == null) {
+//            synchronized (Elvid.class) {
+//                if (instance == null) {
                     instance = new Elvid();
                 }
-            }
-        }
+//            }
+//        }
         return instance;
     }
 

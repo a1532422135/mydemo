@@ -11,6 +11,7 @@ public class Elvis {
     private String info;
     private Elvis(String info){
         this.info = info;
+        System.out.println(info);
     }
     public static final Elvis INSTANCE = new Elvis("info");
 }

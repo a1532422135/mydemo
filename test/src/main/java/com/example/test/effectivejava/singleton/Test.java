@@ -20,14 +20,14 @@ public class Test {
 //    }
 
     public static void main(String[] args) {
-        for(int i = 0;i<max;i++){
-            new Runnable(){
+        for(int i = 0;i<10000;i++){
+            new Thread(new Runnable(){
                 @Override
                 public void run(){
                     Elvid elvid = Elvid.getInstance();
-                    System.out.println(elvid);
+//                    System.out.println(elvid);
                 }
-            }.run();
+            }).start();
         }
     }
 }
