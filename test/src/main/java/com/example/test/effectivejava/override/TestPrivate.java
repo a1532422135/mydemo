@@ -2,8 +2,11 @@ package com.example.test.effectivejava.override;
 
 public class TestPrivate {
     public static void main(String[] args) {
-        B c = new B();
-        c.m1("child");
+        String a = ",,a,a,b,,c,c,dd,,,";
+        String[] b = a.split(",",-1);
+        for(String c:b){
+            System.out.println(c);
+        }
     }
 
     static class A {
