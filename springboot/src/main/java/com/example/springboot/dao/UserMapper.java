@@ -13,11 +13,12 @@ public interface UserMapper {
     @Cacheable(value = "user", key = "#p0")
     List<User> queryUserByName(@Param(value = "name") String name);
 
-    @CacheEvict(value = "user",key = "#p0.name")
+    @CacheEvict(value = "user", key = "#p0.name")
     int insertUser(@Param(value = "user") User user);
 
     @CacheEvict(value = "user", key = "#p0")
     int deleteUserByName(@Param(value = "name") String name);
 
+    @CacheEvict(value = "user", key = "#p0")
     int updateUser(@Param(value = "name") String name, @Param(value = "id") Long id);
 }
