@@ -7,14 +7,18 @@ public class Test {
 
             @Override
             public void run() {
-                p.printNum();
+                while (true) {
+                    p.printNum();
+                }
             }
         }).start();
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                p.printWord();
+                while (true) {
+                    p.printWord();
+                }
             }
         }).start();
     }
@@ -25,6 +29,9 @@ class Print {
     int num = 1;
 
     public synchronized void printNum() {
+        if (num > 9) {
+            num = 1;
+        }
         System.out.print(num);
         num += 1;
         notify();
@@ -37,12 +44,14 @@ class Print {
     }
 
     public synchronized void printWord() {
+        if (chr > 'Z') {
+            chr = 'A';
+        }
         System.out.print(chr);
         chr += 1;
         notify();
         try {
-            if (chr <= 'Z')
-                wait();
+            wait();
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
