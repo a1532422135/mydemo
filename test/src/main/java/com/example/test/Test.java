@@ -16,6 +16,25 @@ import static java.util.stream.Collectors.toSet;
 
 public class Test {
     public static void main(String[] args) {
+        myBreak();
+    }
+
+    public static void myBreak() {
+        aaa:
+        for (int a = 0; a < 3; a++) {
+            System.out.print(a);
+            bbb:
+            for (int b = 'a'; b < 110; b++) {
+                if (b > 107) {
+                    break aaa;
+                }
+                System.out.print(b);
+            }
+            System.out.println();
+        }
+    }
+
+    public static void a() {
         TreeSet treeSet = new TreeSet();
         treeSet.add(1);
         ExecutorService executorService = new ThreadPoolExecutor(10, 20, 10L, TimeUnit.SECONDS,
